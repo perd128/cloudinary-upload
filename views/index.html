@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upload Gambar ke Cloudinary</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="modern-title">Upload Gambar</h1>
+      <form
+        action="/upload"
+        method="POST"
+        enctype="multipart/form-data"
+        id="uploadForm"
+      >
+        <label for="imageInput" class="custom-file-upload"> Pilih Foto </label>
+        <input
+          type="file"
+          name="image"
+          id="imageInput"
+          accept="image/*"
+          required
+        />
+        <div id="fileName">Belum ada file yang dipilih</div>
+        <button type="submit">Upload</button>
+      </form>
+      <div id="preview"></div>
+    </div>
+
+    <script>
+      const input = document.getElementById("imageInput");
+      const fileName = document.getElementById("fileName");
+      const preview = document.getElementById("preview");
+      const form = document.getElementById("uploadForm");
+
+      input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (file) {
+          fileName.textContent = file.name;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-img"/>`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          fileName.textContent = "Belum ada file yang dipilih";
+          preview.innerHTML = "";
+        }
+      });
+
+      form.addEventListener("submit", () => {
+        preview.innerHTML = '<p class="loading">Uploading, please wait...</p>';
+      });
+    </script>
+  </body>
+</html>
