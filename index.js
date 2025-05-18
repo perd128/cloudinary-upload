@@ -14,7 +14,7 @@ cloudinary.config({
 });
 
 const app = express();
-app.use(fileUpload({ useTempFiles: true }));
+app.use(fileUpload()); // Tidak gunakan useTempFiles
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -27,20 +27,28 @@ app.post("/upload", (req, res) => {
   }
 
   const file = req.files.image;
-  cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
-    if (err) return res.send("Upload gagal: " + err.message);
 
-    res.send(`
-      <div style="text-align: center; padding: 30px; font-family: sans-serif">
-        <h2>Gambar berhasil diupload:</h2>
-        <img src="${result.secure_url}" alt="Uploaded Image" style="max-width: 90%; border-radius: 12px;" />
-        <br/><br/>
-        <a href="/" style="text-decoration:none; color:#fff; background:#007bff; padding:10px 20px; border-radius:8px;">Upload Lagi</a>
-      </div>
-    `);
-  });
+  const uploadStream = cloudinary.uploader.upload_stream(
+    { resource_type: "image" },
+    (err, result) => {
+      if (err) return res.send("Upload gagal: " + err.message);
+
+      res.send(`
+        <div style="text-align: center; padding: 30px; font-family: sans-serif">
+          <h2>Gambar berhasil diupload:</h2>
+          <img src="${result.secure_url}" alt="Uploaded Image" style="max-width: 90%; border-radius: 12px;" />
+          <br/><br/>
+          <a href="/" style="text-decoration:none; color:#fff; background:#007bff; padding:10px 20px; border-radius:8px;">Upload Lagi</a>
+        </div>
+      `);
+    }
+  );
+
+  // Kirim data buffer gambar ke Cloudinary
+  uploadStream.end(file.data);
 });
 
-app.listen(3000, () => {
-  console.log("Server berjalan di http://localhost:3000");
+const PORT = process.env.PORT || 3000; // agar bisa diubah Render
+app.listen(PORT, () => {
+  console.log(`Server berjalan di http://localhost:${PORT}`);
 });
